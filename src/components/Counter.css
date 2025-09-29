@@ -1,0 +1,83 @@
+.counter-component {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.counter-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border: 3px solid #646cff;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #646cff15, #646cff05);
+}
+
+.counter-value {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #646cff;
+}
+
+.counter-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.counter-btn {
+  border-radius: 6px;
+  border: 1px solid transparent;
+  padding: 0.4em 0.8em;
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.25s;
+  min-width: 40px;
+}
+
+.counter-btn-primary {
+  background-color: #646cff;
+  color: white;
+}
+
+.counter-btn-primary:hover {
+  background-color: #535bf2;
+  transform: translateY(-1px);
+}
+
+.counter-btn-secondary {
+  background-color: #f39c12;
+  color: white;
+}
+
+.counter-btn-secondary:hover {
+  background-color: #e67e22;
+  transform: translateY(-1px);
+}
+
+.counter-btn-reset {
+  background-color: #95a5a6;
+  color: white;
+  font-size: 0.8rem;
+}
+
+.counter-btn-reset:hover {
+  background-color: #7f8c8d;
+  transform: translateY(-1px);
+}
+
+@media (prefers-color-scheme: light) {
+  .counter-btn-reset {
+    background-color: #6c757d;
+  }
+  
+  .counter-btn-reset:hover {
+    background-color: #5a6268;
+  }
+}
