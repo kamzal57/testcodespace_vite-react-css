@@ -1,0 +1,715 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Planificateur Quotidien</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f3f5f9;
+        --bg-alt: #ffffff;
+        --bg-accent: #e0e7ff;
+        --text: #1f2334;
+        --text-dim: #5b6175;
+        --primary: #4c6ef5;
+        --primary-strong: #364fc7;
+        --border: rgba(31, 43, 84, 0.12);
+        --shadow: 0 18px 40px rgba(37, 56, 88, 0.12);
+      }
+
+      :root[data-theme="dark"] {
+        --bg: #0f172a;
+        --bg-alt: #111a30;
+        --bg-accent: rgba(76, 110, 245, 0.1);
+        --text: #f8fbff;
+        --text-dim: #8ea2c4;
+        --primary: #91a7ff;
+        --primary-strong: #bac8ff;
+        --border: rgba(145, 167, 255, 0.35);
+        --shadow: 0 18px 40px rgba(4, 12, 32, 0.6);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: clamp(24px, 4vw, 48px);
+        padding: clamp(24px, 5vw, 64px) clamp(16px, 4vw, 48px);
+        transition: background 0.4s ease, color 0.4s ease;
+      }
+
+      header.hero {
+        width: min(960px, 100%);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .hero-title {
+        margin: 0;
+        font-size: clamp(1.75rem, 4vw, 2.75rem);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+
+      .hero-subtitle {
+        margin: 6px 0 0;
+        max-width: 540px;
+        font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+        color: var(--text-dim);
+        line-height: 1.6;
+      }
+
+      .theme-toggle {
+        margin-left: auto;
+        border: 1px solid var(--border);
+        background: var(--bg-alt);
+        color: var(--text);
+        border-radius: 999px;
+        padding: 10px 18px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 10px 20px rgba(60, 80, 120, 0.08);
+      }
+
+      .theme-toggle span {
+        font-size: 1rem;
+      }
+
+      .theme-toggle:focus-visible,
+      .theme-toggle:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 25px rgba(76, 110, 245, 0.18);
+        border-color: rgba(76, 110, 245, 0.35);
+      }
+
+      main {
+        width: min(960px, 100%);
+      }
+
+      .app-card {
+        background: var(--bg-alt);
+        border-radius: 28px;
+        padding: clamp(24px, 4vw, 40px);
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+        display: grid;
+        gap: clamp(20px, 3vw, 28px);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .app-card::after {
+        content: "";
+        position: absolute;
+        inset: 18% 6% auto auto;
+        height: clamp(180px, 32vw, 240px);
+        width: clamp(180px, 32vw, 240px);
+        background: radial-gradient(circle at 30% 30%, rgba(76, 110, 245, 0.22), transparent 65%);
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      .app-card > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      .lead {
+        margin: 0;
+        font-size: 1rem;
+        color: var(--text-dim);
+      }
+
+      form {
+        display: grid;
+        gap: 12px;
+      }
+
+      .form-label {
+        font-size: 0.85rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+      }
+
+      .form-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      input[type="text"],
+      input[type="time"] {
+        flex: 1 1 220px;
+        border: 1px solid var(--border);
+        background: var(--bg-alt);
+        color: var(--text);
+        border-radius: 14px;
+        padding: 12px 16px;
+        font-size: 1rem;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      input[type="text"]:focus,
+      input[type="time"]:focus {
+        outline: none;
+        border-color: rgba(76, 110, 245, 0.55);
+        box-shadow: 0 0 0 4px rgba(76, 110, 245, 0.18);
+      }
+
+      button.primary {
+        flex: 1 1 140px;
+        min-width: 140px;
+        border: none;
+        border-radius: 14px;
+        padding: 12px 18px;
+        background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      button.primary:focus-visible,
+      button.primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 15px 30px rgba(76, 110, 245, 0.3);
+      }
+
+      .stats {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      }
+
+      .stat {
+        background: var(--bg-accent);
+        border-radius: 20px;
+        padding: 16px 20px;
+        display: grid;
+        gap: 6px;
+      }
+
+      .stat strong {
+        font-size: 1.8rem;
+        font-weight: 700;
+      }
+
+      .stat span {
+        font-size: 0.9rem;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .filters {
+        display: inline-flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .filter {
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--text);
+        border-radius: 999px;
+        padding: 8px 16px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s ease, border 0.2s ease, color 0.2s ease;
+      }
+
+      .filter.is-active {
+        background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+        color: #fff;
+        border-color: transparent;
+      }
+
+      ul.task-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 12px;
+      }
+
+      .task-item {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 18px;
+        border-radius: 16px;
+        border: 1px solid transparent;
+        background: rgba(255, 255, 255, 0.75);
+        box-shadow: 0 16px 24px rgba(60, 80, 120, 0.08);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border 0.2s ease;
+      }
+
+      :root[data-theme="dark"] .task-item {
+        background: rgba(16, 24, 48, 0.75);
+        box-shadow: 0 16px 28px rgba(4, 12, 32, 0.6);
+      }
+
+      .task-item:hover {
+        transform: translateY(-2px);
+        border-color: rgba(76, 110, 245, 0.4);
+      }
+
+      .task-toggle {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        border: 2px solid var(--border);
+        background: transparent;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: border 0.2s ease, background 0.2s ease, color 0.2s ease;
+        font-size: 0.8rem;
+        font-weight: 700;
+      }
+
+      .task-item.is-completed .task-toggle {
+        background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+        border-color: transparent;
+        color: #fff;
+      }
+
+      .task-content {
+        display: grid;
+        gap: 4px;
+      }
+
+      .task-title {
+        font-weight: 600;
+        font-size: 1rem;
+      }
+
+      .task-meta {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.85rem;
+        color: var(--text-dim);
+      }
+
+      .task-item.is-completed .task-title {
+        text-decoration: line-through;
+        color: var(--text-dim);
+      }
+
+      .task-delete {
+        border: none;
+        background: transparent;
+        color: var(--text-dim);
+        font-size: 0.9rem;
+        cursor: pointer;
+        padding: 6px;
+        transition: color 0.2s ease, transform 0.2s ease;
+      }
+
+      .task-delete:hover,
+      .task-delete:focus-visible {
+        color: #ff6b6b;
+        transform: translateY(-1px);
+      }
+
+      .empty-state {
+        margin: 0;
+        text-align: center;
+        padding: 28px 0 8px;
+        color: var(--text-dim);
+        font-size: 0.95rem;
+      }
+
+      footer {
+        width: min(960px, 100%);
+        text-align: center;
+        font-size: 0.85rem;
+        color: var(--text-dim);
+      }
+
+      footer a {
+        color: inherit;
+        font-weight: 600;
+        text-decoration: none;
+        border-bottom: 1px solid transparent;
+        transition: border-color 0.2s ease;
+      }
+
+      footer a:hover,
+      footer a:focus-visible {
+        border-color: currentColor;
+      }
+
+      @media (max-width: 720px) {
+        header.hero {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .theme-toggle {
+          order: -1;
+        }
+
+        .task-item {
+          grid-template-columns: auto 1fr;
+        }
+
+        .task-delete {
+          justify-self: end;
+        }
+      }
+
+      @media (max-width: 540px) {
+        .form-row {
+          flex-direction: column;
+        }
+
+        button.primary {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hero">
+      <div>
+        <h1 class="hero-title">Planificateur Quotidien</h1>
+        <p class="hero-subtitle">
+          Allez à l’essentiel : ajoutez vos tâches, visualisez votre progression et gardez le rythme grâce à une interface lumineuse ou sombre selon vos envies.
+        </p>
+      </div>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false">
+        <span aria-hidden="true">🌞</span>
+        <span class="theme-toggle__label">Mode clair</span>
+      </button>
+    </header>
+
+    <main>
+      <section class="app-card" aria-labelledby="planner-title">
+        <div>
+          <h2 id="planner-title">Votre agenda intelligent</h2>
+          <p class="lead">
+            Concentrez-vous sur les trois prochaines actions importantes. Ajoutez une heure cible, marquez comme terminé ou filtrer selon votre avancée.
+          </p>
+        </div>
+
+        <form id="task-form" autocomplete="off">
+          <label class="form-label" for="task-title">Nouvelle tâche</label>
+          <div class="form-row">
+            <input id="task-title" type="text" name="title" placeholder="Ex. Préparer la réunion de 14h" maxlength="80" required />
+            <input id="task-time" type="time" name="time" aria-label="Heure cible" />
+            <button class="primary" type="submit">Ajouter</button>
+          </div>
+        </form>
+
+        <div class="stats" aria-live="polite">
+          <div class="stat">
+            <strong id="total-count">0</strong>
+            <span>Tâches totales</span>
+          </div>
+          <div class="stat">
+            <strong id="completed-count">0</strong>
+            <span>Terminées</span>
+          </div>
+        </div>
+
+        <div class="filters" role="radiogroup" aria-label="Filtrer les tâches">
+          <button class="filter is-active" type="button" data-filter="all" aria-pressed="true">Toutes</button>
+          <button class="filter" type="button" data-filter="active" aria-pressed="false">Actives</button>
+          <button class="filter" type="button" data-filter="completed" aria-pressed="false">Terminées</button>
+        </div>
+
+        <ul class="task-list" id="task-list" aria-live="polite" aria-label="Liste des tâches"></ul>
+        <p class="empty-state" id="empty-state">Ajoutez votre première tâche pour démarrer la journée avec énergie.</p>
+      </section>
+    </main>
+
+    <footer>
+      Créé en pur HTML, CSS et JavaScript dans un seul fichier pour rester léger et rapide.
+    </footer>
+
+    <script>
+      (() => {
+        const supportsUUID = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function";
+
+        const selectors = {
+          root: document.documentElement,
+          themeToggle: document.getElementById("theme-toggle"),
+          taskForm: document.getElementById("task-form"),
+          taskTitle: document.getElementById("task-title"),
+          taskTime: document.getElementById("task-time"),
+          taskList: document.getElementById("task-list"),
+          totalCount: document.getElementById("total-count"),
+          completedCount: document.getElementById("completed-count"),
+          emptyState: document.getElementById("empty-state"),
+          filters: Array.from(document.querySelectorAll(".filter")),
+        };
+
+        const storageKey = "planner:tasks";
+        const themeKey = "planner:theme";
+
+        const state = {
+          tasks: [],
+          filter: "all",
+        };
+
+        function loadState() {
+          try {
+            const storedTasks = localStorage.getItem(storageKey);
+            if (storedTasks) {
+              const parsed = JSON.parse(storedTasks);
+              if (Array.isArray(parsed)) {
+                state.tasks = parsed.map((task) => ({
+                  ...task,
+                  completed: Boolean(task.completed),
+                }));
+              }
+            }
+          } catch (error) {
+            console.warn("Impossible de charger les tâches sauvegardées", error);
+          }
+
+          if (!state.tasks.length) {
+            const now = new Date();
+            state.tasks = [
+              {
+                id: "demo-1",
+                title: "Faire le point rapide avec l’équipe",
+                time: new Date(now.getTime() + 60 * 60 * 1000).toTimeString().slice(0, 5),
+                completed: false,
+                createdAt: now.toISOString(),
+              },
+              {
+                id: "demo-2",
+                title: "Envoyer le compte-rendu d’hier",
+                time: "11:30",
+                completed: true,
+                createdAt: now.toISOString(),
+              },
+            ];
+          }
+
+          try {
+            const storedTheme = localStorage.getItem(themeKey);
+            if (storedTheme === "dark" || storedTheme === "light") {
+              applyTheme(storedTheme);
+            } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+              applyTheme("dark");
+            }
+          } catch (error) {
+            console.warn("Impossible de charger le thème sauvegardé", error);
+          }
+        }
+
+        function saveTasks() {
+          try {
+            localStorage.setItem(storageKey, JSON.stringify(state.tasks));
+          } catch (error) {
+            console.warn("Impossible d’enregistrer les tâches", error);
+          }
+        }
+
+        function applyTheme(theme) {
+          selectors.root.setAttribute("data-theme", theme);
+          const isDark = theme === "dark";
+          selectors.themeToggle.setAttribute("aria-pressed", String(isDark));
+          selectors.themeToggle.querySelector("span[aria-hidden]").textContent = isDark ? "🌙" : "🌞";
+          selectors.themeToggle.querySelector(".theme-toggle__label").textContent = isDark ? "Mode sombre" : "Mode clair";
+          try {
+            localStorage.setItem(themeKey, theme);
+          } catch (error) {
+            console.warn("Impossible d’enregistrer le thème", error);
+          }
+        }
+
+        function setFilter(filter) {
+          state.filter = filter;
+          selectors.filters.forEach((button) => {
+            const isActive = button.dataset.filter === filter;
+            button.classList.toggle("is-active", isActive);
+            button.setAttribute("aria-pressed", String(isActive));
+          });
+          render();
+        }
+
+        function filteredTasks() {
+          switch (state.filter) {
+            case "completed":
+              return state.tasks.filter((task) => task.completed);
+            case "active":
+              return state.tasks.filter((task) => !task.completed);
+            default:
+              return state.tasks;
+          }
+        }
+
+        function updateCounters() {
+          const total = state.tasks.length;
+          const completed = state.tasks.filter((task) => task.completed).length;
+          selectors.totalCount.textContent = total.toString();
+          selectors.completedCount.textContent = completed.toString();
+        }
+
+        function syncEmptyState(hasTasks) {
+          selectors.emptyState.hidden = hasTasks;
+        }
+
+        function render() {
+          const tasksToDisplay = filteredTasks();
+          selectors.taskList.innerHTML = "";
+
+          if (!tasksToDisplay.length) {
+            syncEmptyState(false);
+            updateCounters();
+            return;
+          }
+
+          syncEmptyState(true);
+
+          const fragment = document.createDocumentFragment();
+
+          tasksToDisplay
+            .slice()
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            .forEach((task) => {
+              const listItem = document.createElement("li");
+              listItem.className = `task-item${task.completed ? " is-completed" : ""}`;
+              listItem.dataset.id = task.id;
+
+              const toggle = document.createElement("button");
+              toggle.className = "task-toggle";
+              toggle.setAttribute("type", "button");
+              toggle.setAttribute("aria-label", task.completed ? "Marquer comme active" : "Marquer comme terminée");
+              toggle.textContent = task.completed ? "✓" : "";
+
+              const content = document.createElement("div");
+              content.className = "task-content";
+
+              const title = document.createElement("span");
+              title.className = "task-title";
+              title.textContent = task.title;
+              content.appendChild(title);
+
+              if (task.time) {
+                const meta = document.createElement("span");
+                meta.className = "task-meta";
+                meta.innerHTML = `<strong>⏰</strong>${task.time}`;
+                content.appendChild(meta);
+              }
+
+              const removeButton = document.createElement("button");
+              removeButton.className = "task-delete";
+              removeButton.setAttribute("type", "button");
+              removeButton.setAttribute("aria-label", `Supprimer la tâche « ${task.title} »`);
+              removeButton.textContent = "✕";
+
+              listItem.append(toggle, content, removeButton);
+              fragment.appendChild(listItem);
+            });
+
+          selectors.taskList.appendChild(fragment);
+          updateCounters();
+        }
+
+        function addTask(title, time) {
+          const task = {
+            id: supportsUUID ? crypto.randomUUID() : `t_${Date.now()}`,
+            title,
+            time: time || "",
+            completed: false,
+            createdAt: new Date().toISOString(),
+          };
+
+          state.tasks = [task, ...state.tasks];
+          saveTasks();
+          render();
+        }
+
+        function toggleTask(id) {
+          state.tasks = state.tasks.map((task) =>
+            task.id === id ? { ...task, completed: !task.completed } : task,
+          );
+          saveTasks();
+          render();
+        }
+
+        function deleteTask(id) {
+          state.tasks = state.tasks.filter((task) => task.id !== id);
+          saveTasks();
+          render();
+        }
+
+        selectors.taskForm.addEventListener("submit", (event) => {
+          event.preventDefault();
+          const title = selectors.taskTitle.value.trim();
+          const time = selectors.taskTime.value.trim();
+
+          if (!title) {
+            selectors.taskTitle.focus();
+            selectors.taskTitle.setAttribute("aria-invalid", "true");
+            return;
+          }
+
+          selectors.taskTitle.removeAttribute("aria-invalid");
+          addTask(title, time);
+          selectors.taskForm.reset();
+          selectors.taskTitle.focus();
+        });
+
+        selectors.filters.forEach((button) => {
+          button.addEventListener("click", () => {
+            setFilter(button.dataset.filter || "all");
+          });
+        });
+
+        selectors.taskList.addEventListener("click", (event) => {
+          const target = event.target;
+          if (!(target instanceof HTMLElement)) return;
+
+          const listItem = target.closest(".task-item");
+          if (!listItem) return;
+
+          const taskId = listItem.dataset.id;
+          if (!taskId) return;
+
+          if (target.classList.contains("task-toggle")) {
+            toggleTask(taskId);
+          } else if (target.classList.contains("task-delete")) {
+            deleteTask(taskId);
+          }
+        });
+
+        selectors.themeToggle.addEventListener("click", () => {
+          const currentTheme = selectors.root.getAttribute("data-theme") === "dark" ? "dark" : "light";
+          applyTheme(currentTheme === "dark" ? "light" : "dark");
+        });
+
+        loadState();
+        render();
+      })();
+    </script>
+  </body>
+</html>
